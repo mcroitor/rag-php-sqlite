@@ -1,5 +1,4 @@
-# RAG-SQLite (PHP + Markdown + Ollama)
-
+# RAG-PHP-SQLite
 ## Software Requirements Specification (SRS)
 
 ---
@@ -8,7 +7,7 @@
 
 #### 1.1 Назначение системы
 
-Система RAG-SQLite предназначена для построения локального Retrieval-Augmented Generation (RAG) движка на основе Markdown-документов с использованием PHP и SQLite.
+Система RAG-PHP-SQLite предназначена для построения локального Retrieval-Augmented Generation (RAG) движка на основе Markdown-документов с использованием PHP и SQLite.
 
 Система обеспечивает:
 
@@ -684,7 +683,7 @@ H --> I[Store]
 
 #### 14.3 Журналирование
 
-Для журналирования используется библиотека [Mc\Logger](https://github.com/mcroitor/logger). Можно расширить её под JSON журналирование (например, используя pretifier).
+Для журналирования используется библиотека [Mc\Logger](https://github.com/mcroitor/logger.git). Можно расширить её под JSON журналирование (например, используя pretifier).
 
 ---
 
@@ -1134,13 +1133,51 @@ php bin/setup.php
 
 ```json
 {
+  "name": "mcroitor/RAG-PHP-SQLite",
+  "description": "Local RAG engine using PHP, SQLite, and Ollama",
+  "type": "project",
+  "license": "MIT",
   "require": {
     "php": "^8.1",
     "ext-sqlite3": "*",
     "ext-json": "*",
-  }
+    "mc/logger": "dev-master",
+    "mc/http": "dev-master"
+  },
+  "require-dev": {
+    "mc/unit": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/mc-logger.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/mc-http.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/mc-unit.git"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
 ```
+
+Библиотеки для использования:
+
+* `\Mc\Logger` - для журналирования (https://github.com/mcroitor/mc-logger.git)
+* `\Mc\Unit` - для тестов (https://github.com/mcroitor/mc-unit.git)
+* `\Mc\Http` - для HTTP запросов (https://github.com/mcroitor/mc-http.git)
+
+Предпочитать стандартную библиотеку и указанные библиотеки. Другие библиотеки не использовать.
 
 #### 20.4 Проверка установки
 
@@ -1322,7 +1359,7 @@ class RAGService {
         private LLMProvider $llm,
         private StorageInterface $storage,
         private RetrieverInterface $retriever,
-        private LoggerInterface $logger
+        private Logger $logger
     ) {}
 }
 ```
