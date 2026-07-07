@@ -1,0 +1,70 @@
+{
+  "name": "mcroitor/rag-php-sqlite",
+  "description": "Local RAG engine using PHP, SQLite, and Ollama",
+  "type": "project",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": "^8.1",
+    "ext-sqlite3": "*",
+    "ext-json": "*",
+    "mcroitor/logger": "dev-main",
+    "mcroitor/mc-http": "dev-main",
+    "mcroitor/arguments": "dev-main"
+  },
+  "require-dev": {
+    "mcroitor/mc-unit": "dev-main",
+    "phpstan/phpstan": "^2.2"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/logger.git",
+      "no-api": true,
+      "options": {
+        "ssl": {
+          "verify_peer": true
+        }
+      }
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/arguments.git",
+      "no-api": true,
+      "options": {
+        "ssl": {
+          "verify_peer": true
+        }
+      }
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/mc-http.git",
+      "no-api": true,
+      "options": {
+        "ssl": {
+          "verify_peer": true
+        }
+      }
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/mcroitor/mc-unit.git",
+      "no-api": true,
+      "options": {
+        "ssl": {
+          "verify_peer": true
+        }
+      }
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    },
+    "classmap": [
+      "vendor/mcroitor/logger/src/mc/logger.php"
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
