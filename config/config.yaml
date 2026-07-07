@@ -1,0 +1,17 @@
+ollama:
+  base_url: http://localhost:11434
+
+embedding:
+  model: qwen3-embedding:4b
+  dimension: 2048
+  max_tokens: 2000
+  safety_margin: 300
+  retry: 3
+
+llm:
+  model: qwen3.5:4b
+  temperature: 0.7
+
+retrieval:
+  top_k: 5
+  threshold: 0.65
