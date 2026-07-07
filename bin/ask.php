@@ -90,7 +90,8 @@ $llm = new OllamaLLM(
 );
 
 $retriever = new VectorRetriever($embedding, $storage, $topK, $config->getThreshold());
-$promptBuilder = new PromptBuilder(maxContextTokens: 4096);
+$maxContextTokens = max(256, $config->getMaxTokens() - $config->getSafetyMargin());
+$promptBuilder = new PromptBuilder(maxContextTokens: $maxContextTokens);
 $rag = new RAGService($retriever, $promptBuilder, $llm);
 
 $log->info("Asking: $query");
