@@ -3,12 +3,13 @@
 namespace App\Prompt;
 
 use App\Core\Entities\RetrievalResult;
+use App\Utils\Constant;
 
 class ContextWindow
 {
     private int $maxTokens;
 
-    public function __construct(int $maxTokens = 4096)
+    public function __construct(int $maxTokens = Constant::DEFAULT_MAX_CONTEXT_TOKENS)
     {
         $this->maxTokens = $maxTokens;
     }
@@ -19,11 +20,12 @@ class ContextWindow
         $fitted = [];
         $totalTokens = 0;
 
-        $results = $this->sortByScoreDesc($results);
+        // Work on a copy to avoid mutating the caller's array
+        $sortedResults = $this->sortByScoreDesc($results);
 
-        foreach ($results as $result) {
+        foreach ($sortedResults as $result) {
             $chunkTokens = $result->getChunk()->getTokenCount();
-            $overhead = 20;
+            $overhead = Constant::CONTEXT_OVERHEAD_PER_CHUNK;
 
             if ($totalTokens + $chunkTokens + $overhead <= $maxTokens) {
                 $fitted[] = $result;
@@ -42,7 +44,8 @@ class ContextWindow
     /** @param RetrievalResult[] $results @return RetrievalResult[] */
     private function sortByScoreDesc(array $results): array
     {
-        usort($results, fn($a, $b) => $b->getScore() <=> $a->getScore());
-        return $results;
+        $copy = $results;
+        usort($copy, fn($a, $b) => $b->getScore() <=> $a->getScore());
+        return $copy;
     }
 }

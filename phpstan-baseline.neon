@@ -1,0 +1,61 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Chunker\\SemanticChunker\:\:processSection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Chunker/SemanticChunker.php
+
+		-
+			message: '#^Method App\\Core\\Interfaces\\EmbeddingProvider\:\:embedBatch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Core/Interfaces/EmbeddingProvider.php
+
+		-
+			message: '#^Method App\\Core\\Interfaces\\StorageInterface\:\:searchSimilar\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Core/Interfaces/StorageInterface.php
+
+		-
+			message: '#^Method App\\Embedding\\OllamaEmbedding\:\:embedBatch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Embedding/OllamaEmbedding.php
+
+		-
+			message: '#^Method App\\Parser\\HeadingTree\:\:getNodes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Parser/HeadingTree.php
+
+		-
+			message: '#^Property App\\Parser\\HeadingTree\:\:\$nodes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Parser/HeadingTree.php
+
+		-
+			message: '#^Method App\\Prompt\\ContextWindow\:\:fit\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Prompt/ContextWindow.php
+
+		-
+			message: '#^Method App\\Prompt\\ContextWindow\:\:sortByScoreDesc\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Prompt/ContextWindow.php
+
+		-
+			message: '#^Method App\\Storage\\SQLiteStorage\:\:searchSimilar\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Storage/SQLiteStorage.php
+
+		-
+			message: '#^Method App\\Storage\\VectorSearch\:\:cosineSimilarity\(\) has parameter \$vectorB with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Storage/VectorSearch.php

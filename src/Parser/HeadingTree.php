@@ -32,10 +32,19 @@ class HeadingTree
 
             $headingPath = implode(' > ', array_map(fn($n) => $n['text'], $stack));
 
+            // Combine parent content with current node content
+            $combinedContent = '';
+            foreach ($stack as $stackNode) {
+                if ($stackNode['content'] !== '') {
+                    $combinedContent .= $stackNode['content'] . "\n\n";
+                }
+            }
+            $combinedContent = trim($combinedContent);
+
             $sections[] = [
                 'heading_path' => $headingPath,
                 'level' => $node['level'],
-                'content' => $node['content'],
+                'content' => $combinedContent,
             ];
         }
 

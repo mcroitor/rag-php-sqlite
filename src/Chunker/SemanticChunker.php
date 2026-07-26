@@ -5,16 +5,17 @@ namespace App\Chunker;
 use App\Core\Entities\Chunk;
 use App\Core\Entities\Document;
 use App\Core\Interfaces\ChunkerInterface;
+use App\Utils\Constant;
 
 class SemanticChunker implements ChunkerInterface
 {
-    private int $maxTokens;
+    private int $effectiveMaxTokens;
     private int $overlap;
     private TokenCounter $counter;
 
-    public function __construct(int $maxTokens = 1500, int $overlap = 0)
+    public function __construct(int $maxTokens = Constant::DEFAULT_EMBED_MAX_TOKENS, int $overlap = Constant::DEFAULT_EMBED_OVERLAP, int $safetyMargin = Constant::DEFAULT_EMBED_SAFETY_MARGIN)
     {
-        $this->maxTokens = $maxTokens;
+        $this->effectiveMaxTokens = max(1, $maxTokens - $safetyMargin);
         $this->overlap = $overlap;
         $this->counter = new TokenCounter();
     }
@@ -22,7 +23,15 @@ class SemanticChunker implements ChunkerInterface
     /** @return Chunk[] */
     public function chunk(Document $document): array
     {
-        return $this->chunkText($document->getPath());
+        $path = $document->getPath();
+        if (!file_exists($path) || !is_readable($path)) {
+            return [];
+        }
+        $content = file_get_contents($path);
+        if ($content === false) {
+            return [];
+        }
+        return $this->chunkText($content, $document);
     }
 
     /** @return Chunk[] */
@@ -37,9 +46,10 @@ class SemanticChunker implements ChunkerInterface
                 $chunk = new Chunk();
                 $chunk->setHeadingPath($chunkData['heading_path'] ?? '');
 
+                $chunk->setHash(md5($chunkData['text']));
+
                 if ($document !== null) {
                     $chunk->setDocumentId($document->getId());
-                    $chunk->setHash(md5($chunkData['text']));
                 }
 
                 $chunk->setText($chunkData['text']);
@@ -112,7 +122,7 @@ class SemanticChunker implements ChunkerInterface
         $heading = $section['heading'];
         $headingPath = $heading;
 
-        if ($this->counter->count($text) <= $this->maxTokens) {
+        if ($this->counter->count($text) <= $this->effectiveMaxTokens) {
             return [
                 [
                     'text' => $text,
@@ -141,7 +151,7 @@ class SemanticChunker implements ChunkerInterface
 
             $paraTokens = $this->counter->count($paragraph);
 
-            if ($paraTokens > $this->maxTokens) {
+            if ($paraTokens > $this->effectiveMaxTokens) {
                 if ($currentChunk !== '') {
                     $chunks[] = [
                         'text' => trim($currentChunk),
@@ -157,7 +167,7 @@ class SemanticChunker implements ChunkerInterface
                 continue;
             }
 
-            if ($currentTokens + $paraTokens > $this->maxTokens) {
+            if ($currentTokens + $paraTokens > $this->effectiveMaxTokens) {
                 $chunks[] = [
                     'text' => trim($currentChunk),
                     'token_count' => $currentTokens,
@@ -200,7 +210,7 @@ class SemanticChunker implements ChunkerInterface
 
             $sentTokens = $this->counter->count($sentence);
 
-            if ($sentTokens > $this->maxTokens) {
+            if ($sentTokens > $this->effectiveMaxTokens) {
                 if ($currentChunk !== '') {
                     $chunks[] = [
                         'text' => trim($currentChunk),
@@ -216,7 +226,7 @@ class SemanticChunker implements ChunkerInterface
                 continue;
             }
 
-            if ($currentTokens + $sentTokens > $this->maxTokens) {
+            if ($currentTokens + $sentTokens > $this->effectiveMaxTokens) {
                 $chunks[] = [
                     'text' => trim($currentChunk),
                     'token_count' => $currentTokens,
@@ -247,12 +257,12 @@ class SemanticChunker implements ChunkerInterface
     private function splitByChars(string $text, string $headingPath): array
     {
         $chunks = [];
-        $avgCharPerToken = 4;
-        $maxChars = $this->maxTokens * $avgCharPerToken;
-        $textLength = strlen($text);
+        $avgCharPerToken = Constant::AVG_CHAR_PER_TOKEN;
+        $maxChars = $this->effectiveMaxTokens * $avgCharPerToken;
+        $textLength = mb_strlen($text);
 
         for ($i = 0; $i < $textLength; $i += $maxChars) {
-            $part = substr($text, $i, $maxChars);
+            $part = mb_substr($text, $i, $maxChars);
             $chunks[] = [
                 'text' => trim($part),
                 'token_count' => $this->counter->count($part),

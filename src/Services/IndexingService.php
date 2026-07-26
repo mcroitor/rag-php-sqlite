@@ -9,8 +9,10 @@ use App\Core\Interfaces\EmbeddingProvider;
 use App\Core\Interfaces\StorageInterface;
 use App\Loader\FileScanner;
 use App\Loader\MarkdownLoader;
+use App\Parser\HeadingTree;
 use App\Parser\MarkdownParser;
 use App\Utils\AppLogger;
+use App\Utils\Constant;
 use App\Validator\ChunkValidator;
 
 class IndexingService
@@ -24,6 +26,7 @@ class IndexingService
         private EmbeddingProvider $embedding,
         private StorageInterface $storage,
         private string $embeddingVersion = '1.0',
+        private ?\App\Embedding\EmbeddingCache $cache = null,
     ) {
     }
 
@@ -42,14 +45,17 @@ class IndexingService
             'chunks' => 0,
         ];
 
-        foreach ($files as $filePath) {
+        foreach ($files as $index => $filePath) {
             try {
+                $progress = round((($index + 1) / count($files)) * 100);
+                $log->info("[$progress%] Processing: $filePath");
+
                 if ($incremental) {
                     $existingHash = $this->storage->getDocumentHash($filePath);
                     $currentHash = md5_file($filePath);
 
                     if ($existingHash !== null && $existingHash === $currentHash) {
-                        $log->info("Skipped (unchanged): $filePath");
+                        $log->info("[$progress%] Skipped (unchanged): $filePath");
                         $stats['skipped']++;
                         continue;
                     }
@@ -59,7 +65,8 @@ class IndexingService
                 $stats['processed']++;
 
             } catch (\Throwable $e) {
-                $log->error("Failed to process $filePath: " . $e->getMessage());
+                $progress = isset($progress) ? $progress : '??';
+                $log->error("[$progress%] Failed to process $filePath: " . $e->getMessage());
                 $stats['failed']++;
             }
         }
@@ -73,7 +80,7 @@ class IndexingService
     private function processFile(string $filePath, array &$stats): void
     {
         $log = AppLogger::instance();
-        $log->info("Processing: $filePath");
+        // Removed local info log to avoid duplication with progress in indexDirectory
 
         $document = $this->loader->load($filePath);
 
@@ -85,9 +92,16 @@ class IndexingService
 
             $sections = $this->parser->parse($document);
 
+            // Build hierarchical heading paths
+            $tree = new HeadingTree();
+            foreach ($sections as $section) {
+                $tree->addHeading($section['level'], $section['heading'], $section['content']);
+            }
+            $hierarchicalSections = $tree->flatten();
+
             $chunks = [];
 
-            foreach ($sections as $section) {
+            foreach ($hierarchicalSections as $section) {
                 $sectionDoc = new Document();
                 $sectionDoc->setId($docId);
                 $sectionDoc->setPath($filePath);
@@ -102,7 +116,7 @@ class IndexingService
                 $chunksFromSection = $this->chunker->chunkText($chunkText, $sectionDoc);
 
                 foreach ($chunksFromSection as $chunk) {
-                    $chunk->setHeadingPath($section['heading'] ?? '');
+                    $chunk->setHeadingPath($section['heading_path']);
                     $chunk->setDocumentHash($document->getHash());
 
                     try {
@@ -118,19 +132,30 @@ class IndexingService
                 }
             }
 
+            if (count($chunks) > Constant::MAX_CHUNKS_PER_DOCUMENT) {
+                $log->error("Too many chunks from $filePath: " . count($chunks) . " (limit " . Constant::MAX_CHUNKS_PER_DOCUMENT . ")");
+                $this->storage->rollback();
+                return;
+            }
+
+            $chunksToEmbed = [];
             foreach ($chunks as $chunk) {
                 $chunkId = $this->storage->storeChunk($chunk);
+                $headingContext = $chunk->getHeadingPath() !== ''
+                    ? "Раздел: {$chunk->getHeadingPath()}\n\n"
+                    : '';
+                $embeddingText = $headingContext . $chunk->getText();
+                $chunksToEmbed[] = [
+                    'id' => $chunkId,
+                    'text' => $embeddingText,
+                    'hash' => md5($embeddingText),
+                    'document_id' => $docId,
+                ];
+            }
 
-                $vector = $this->embedding->embed($chunk->getText());
-                $this->storage->storeEmbedding(
-                    $chunkId,
-                    $vector,
-                    $this->embedding->getModel(),
-                    $this->embedding->getDimension(),
-                    $this->embeddingVersion,
-                );
-
-                $stats['chunks']++;
+            if (!empty($chunksToEmbed)) {
+                $this->embedAndStoreChunks($chunksToEmbed);
+                $stats['chunks'] += count($chunksToEmbed);
             }
 
             $this->storage->commit();
@@ -139,6 +164,55 @@ class IndexingService
         } catch (\Throwable $e) {
             $this->storage->rollback();
             throw $e;
+        }
+    }
+
+    /** @param list<array{id: int, text: string, hash: string, document_id: int}> $chunkData */
+    private function embedAndStoreChunks(array $chunkData): void
+    {
+        $toEmbedTexts = [];
+        $mapping = [];
+
+        foreach ($chunkData as $data) {
+            $documentId = $data['document_id'];
+            $cacheDimension = $this->embedding->getDimension();
+            if ($this->cache !== null && $this->cache->has($data['hash'], $this->embedding->getModel(), $documentId, $cacheDimension)) {
+                $vector = $this->cache->get($data['hash'], $this->embedding->getModel(), $documentId, $cacheDimension);
+                $this->storage->storeEmbedding(
+                    $data['id'],
+                    $vector,
+                    $this->embedding->getModel(),
+                    $this->embedding->getDimension(),
+                    $this->embeddingVersion,
+                );
+            } else {
+                $mapping[] = $data;
+                $toEmbedTexts[] = $data['text'];
+            }
+        }
+
+        if (!empty($toEmbedTexts)) {
+            $embeddings = $this->embedding->embedBatch($toEmbedTexts);
+            foreach ($mapping as $idx => $data) {
+                $vector = $embeddings[$idx];
+                $documentId = $data['document_id'];
+                if ($this->cache !== null) {
+                    $this->cache->set(
+                        $data['hash'],
+                        $this->embedding->getModel(),
+                        $this->embedding->getDimension(),
+                        $vector,
+                        $documentId
+                    );
+                }
+                $this->storage->storeEmbedding(
+                    $data['id'],
+                    $vector,
+                    $this->embedding->getModel(),
+                    $this->embedding->getDimension(),
+                    $this->embeddingVersion,
+                );
+            }
         }
     }
 }

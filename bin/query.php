@@ -7,6 +7,7 @@ use App\Services\QueryService;
 use App\Storage\SQLiteStorage;
 use App\Utils\AppLogger;
 use App\Utils\Config;
+use App\Utils\Constant;
 
 set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
@@ -31,7 +32,7 @@ try {
     'top-k' => [
         'short' => 'k',
         'long' => 'top-k',
-        'description' => 'Number of results (default: 5)',
+        'description' => 'Number of results (default: ' . Constant::DEFAULT_TOP_K . ')',
         'required' => false,
         'default' => null,
     ],
@@ -69,7 +70,7 @@ try {
     exit(1);
 }
 
-$topK = (int) (\Mc\Arguments::GetValue('top-k') ?: $config->getTopK());
+$topK = max(1, (int) (\Mc\Arguments::GetValue('top-k') ?: $config->getTopK()));
 $format = \Mc\Arguments::GetValue('format') ?: 'text';
 $query = (string) \Mc\Arguments::GetValue('query');
 
@@ -80,9 +81,11 @@ $embedding = new OllamaEmbedding(
     retryCount: $config->getRetryCount(),
 );
 
-$storage = new SQLiteStorage(__DIR__ . '/../rag.sqlite');
+$db = new \PDO("sqlite:" . __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME);
 
-$service = new QueryService($embedding, $storage, $topK, $config->getThreshold());
+$storage = new SQLiteStorage($db);
+
+$service = new QueryService($embedding, $storage, $config->getThreshold());
 
 $log->info("Searching: $query");
 

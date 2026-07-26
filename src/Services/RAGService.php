@@ -16,9 +16,10 @@ class RAGService
     ) {
     }
 
-    public function ask(string $query, int $topK = 5): string
+    /** @param RetrievalResult[]|null $preRetrieved */
+    public function ask(string $query, int $topK = 5, ?array $preRetrieved = null): string
     {
-        $results = $this->retriever->retrieve($query, $topK);
+        $results = $preRetrieved ?? $this->retriever->retrieve($query, $topK);
         $prompt = $this->promptBuilder->build($query, $results);
 
         return $this->llm->generate($prompt);

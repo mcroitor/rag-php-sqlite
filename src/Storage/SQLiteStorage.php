@@ -2,6 +2,8 @@
 
 namespace App\Storage;
 
+use App\Storage\VectorSearch;
+
 use App\Core\Entities\Chunk;
 use App\Core\Entities\Document;
 use App\Core\Entities\RetrievalResult;
@@ -10,14 +12,16 @@ use App\Core\Interfaces\StorageInterface;
 
 class SQLiteStorage implements StorageInterface
 {
-    private \SQLite3 $db;
+    private \PDO $db;
     private VectorSearch $vectorSearch;
 
-    public function __construct(string $dbPath)
+    public function __construct(\PDO $db)
     {
         $this->vectorSearch = new VectorSearch();
 
-        $this->db = new \SQLite3($dbPath);
+        $this->db = $db;
+        $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
         $this->db->exec('PRAGMA journal_mode = WAL');
         $this->db->exec('PRAGMA foreign_keys = ON');
     }
@@ -27,12 +31,12 @@ class SQLiteStorage implements StorageInterface
         $stmt = $this->db->prepare(
             'INSERT OR REPLACE INTO documents (path, hash, created_at) VALUES (:path, :hash, COALESCE(:created_at, datetime(\'now\')))'
         );
-        $stmt->bindValue(':path', $document->getPath(), SQLITE3_TEXT);
-        $stmt->bindValue(':hash', $document->getHash(), SQLITE3_TEXT);
-        $stmt->bindValue(':created_at', $document->getCreatedAt() ?? date('Y-m-d H:i:s'), SQLITE3_TEXT);
+        $stmt->bindValue(':path', $document->getPath());
+        $stmt->bindValue(':hash', $document->getHash());
+        $stmt->bindValue(':created_at', $document->getCreatedAt() ?? date('Y-m-d H:i:s'));
         $stmt->execute();
 
-        $id = $this->db->lastInsertRowID();
+        $id = (int)$this->db->lastInsertId();
         $document->setId($id);
 
         return $id;
@@ -41,9 +45,9 @@ class SQLiteStorage implements StorageInterface
     public function getDocumentByPath(string $path): ?Document
     {
         $stmt = $this->db->prepare('SELECT * FROM documents WHERE path = :path');
-        $stmt->bindValue(':path', $path, SQLITE3_TEXT);
-        $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $stmt->bindValue(':path', $path);
+        $stmt->execute();
+        $row = $stmt->fetch();
 
         if ($row === false) {
             return null;
@@ -72,21 +76,20 @@ class SQLiteStorage implements StorageInterface
     public function storeChunk(Chunk $chunk): int
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO chunks (document_id, heading_path, text, token_count, hash, language, embedding_model, document_hash, chunk_hash)
-             VALUES (:document_id, :heading_path, :text, :token_count, :hash, :language, :embedding_model, :document_hash, :chunk_hash)'
+            'INSERT INTO chunks (document_id, heading_path, text, token_count, hash, language, embedding_model, document_hash)
+             VALUES (:document_id, :heading_path, :text, :token_count, :hash, :language, :embedding_model, :document_hash)'
         );
-        $stmt->bindValue(':document_id', $chunk->getDocumentId(), SQLITE3_INTEGER);
-        $stmt->bindValue(':heading_path', $chunk->getHeadingPath(), SQLITE3_TEXT);
-        $stmt->bindValue(':text', $chunk->getText(), SQLITE3_TEXT);
-        $stmt->bindValue(':token_count', $chunk->getTokenCount(), SQLITE3_INTEGER);
-        $stmt->bindValue(':hash', $chunk->getHash(), SQLITE3_TEXT);
-        $stmt->bindValue(':language', $chunk->getLanguage(), SQLITE3_TEXT);
-        $stmt->bindValue(':embedding_model', $chunk->getEmbeddingModel(), SQLITE3_TEXT);
-        $stmt->bindValue(':document_hash', $chunk->getDocumentHash(), SQLITE3_TEXT);
-        $stmt->bindValue(':chunk_hash', $chunk->getHash(), SQLITE3_TEXT);
+        $stmt->bindValue(':document_id', $chunk->getDocumentId(), \PDO::PARAM_INT);
+        $stmt->bindValue(':heading_path', $chunk->getHeadingPath());
+        $stmt->bindValue(':text', $chunk->getText());
+        $stmt->bindValue(':token_count', $chunk->getTokenCount(), \PDO::PARAM_INT);
+        $stmt->bindValue(':hash', $chunk->getHash());
+        $stmt->bindValue(':language', $chunk->getLanguage());
+        $stmt->bindValue(':embedding_model', $chunk->getEmbeddingModel());
+        $stmt->bindValue(':document_hash', $chunk->getDocumentHash());
         $stmt->execute();
 
-        $id = $this->db->lastInsertRowID();
+        $id = (int)$this->db->lastInsertId();
         $chunk->setId($id);
 
         return $id;
@@ -99,27 +102,28 @@ class SQLiteStorage implements StorageInterface
             'INSERT OR REPLACE INTO embeddings (chunk_id, vector, embedding_model, embedding_dimension, embedding_version, created_at)
              VALUES (:chunk_id, :vector, :model, :dimension, :version, datetime(\'now\'))'
         );
-        $stmt->bindValue(':chunk_id', $chunkId, SQLITE3_INTEGER);
-        $stmt->bindValue(':vector', json_encode($vector), SQLITE3_TEXT);
-        $stmt->bindValue(':model', $model, SQLITE3_TEXT);
-        $stmt->bindValue(':dimension', $dimension, SQLITE3_INTEGER);
-        $stmt->bindValue(':version', $version, SQLITE3_TEXT);
+        $stmt->bindValue(':chunk_id', $chunkId, \PDO::PARAM_INT);
+        $stmt->bindValue(':vector', json_encode($vector));
+        $stmt->bindValue(':model', $model);
+        $stmt->bindValue(':dimension', $dimension, \PDO::PARAM_INT);
+        $stmt->bindValue(':version', $version);
         $stmt->execute();
     }
 
     /** @param list<float> $queryVector @return RetrievalResult[] */
     public function searchSimilar(array $queryVector, int $topK, float $threshold): array
     {
-        $results = $this->db->query(
+        $stmt = $this->db->prepare(
             'SELECT c.id, c.document_id, c.heading_path, c.text, c.token_count, c.hash, c.language,
-                    c.embedding_model, c.document_hash, c.chunk_hash,
+                    c.embedding_model, c.document_hash,
                     e.vector, e.embedding_model AS emb_model, e.embedding_dimension
              FROM chunks c
              INNER JOIN embeddings e ON e.chunk_id = c.id'
         );
+        $stmt->execute();
 
         $candidates = [];
-        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $stmt->fetch()) {
             $vector = json_decode($row['vector'], true);
 
             if (!is_array($vector)) {
@@ -168,14 +172,14 @@ class SQLiteStorage implements StorageInterface
 
     public function getDocumentCount(): int
     {
-        $result = $this->db->querySingle('SELECT COUNT(*) FROM documents');
-        return (int) $result;
+        $stmt = $this->db->query('SELECT COUNT(*) FROM documents');
+        return (int) $stmt->fetchColumn();
     }
 
     public function getChunkCount(): int
     {
-        $result = $this->db->querySingle('SELECT COUNT(*) FROM chunks');
-        return (int) $result;
+        $stmt = $this->db->query('SELECT COUNT(*) FROM chunks');
+        return (int) $stmt->fetchColumn();
     }
 
     public function clearAll(): void
@@ -196,7 +200,8 @@ class SQLiteStorage implements StorageInterface
         $chunk->setTokenCount((int) $row['token_count']);
         $chunk->setHash($row['hash']);
         $chunk->setLanguage($row['language'] ?? '');
-        $chunk->setEmbeddingModel($row['embedding_model'] ?? '');
+        // Use emb_model from embeddings table (aliased in query) as it's the actual embedding model used
+        $chunk->setEmbeddingModel($row['emb_model'] ?? $row['embedding_model'] ?? '');
         $chunk->setDocumentHash($row['document_hash'] ?? '');
         return $chunk;
     }
@@ -208,9 +213,9 @@ class SQLiteStorage implements StorageInterface
         }
 
         $stmt = $this->db->prepare('SELECT path FROM documents WHERE id = :id');
-        $stmt->bindValue(':id', $documentId, SQLITE3_INTEGER);
-        $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $stmt->bindValue(':id', $documentId, \PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch();
 
         return $row ? $row['path'] : '';
     }

@@ -2,16 +2,23 @@
 
 namespace App\Storage;
 
+use App\Utils\Constant;
+
 class VectorSearch
 {
     /** @param list<float> $vectorA @param list<float> $vectorB */
     public function cosineSimilarity(array $vectorA, array $vectorB): float
     {
+        $count = count($vectorA);
+        $countB = count($vectorB);
+
+        if ($count !== $countB || $count === 0) {
+            return 0.0;
+        }
+
         $dotProduct = 0.0;
         $normA = 0.0;
         $normB = 0.0;
-
-        $count = count($vectorA);
 
         for ($i = 0; $i < $count; $i++) {
             $a = (float) $vectorA[$i];
@@ -23,7 +30,7 @@ class VectorSearch
 
         $denominator = sqrt($normA) * sqrt($normB);
 
-        if ($denominator < 1e-10) {
+        if ($denominator < Constant::VECTOR_ZERO_THRESHOLD) {
             return 0.0;
         }
 

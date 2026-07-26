@@ -4,36 +4,77 @@ namespace App\Embedding;
 
 class EmbeddingCache
 {
-    /** @var array<string, list<float>> */
-    private array $cache = [];
+    private \PDO $db;
+    public function __construct(
+        \PDO $db,
+    ) {
+        $this->db = $db;
+    }
 
     /** @return list<float>|null */
-    public function get(string $textHash): ?array
+    public function get(string $textHash, string $model, ?int $documentId = null, ?int $dimension = null): ?array
     {
-        $key = $this->hashKey($textHash);
+        $sql = 'SELECT vector FROM embedding_cache WHERE hash = :hash AND model = :model';
+        $params = [':hash' => $textHash, ':model' => $model];
 
-        if (isset($this->cache[$key])) {
-            return $this->cache[$key];
+        if ($documentId !== null) {
+            $sql .= ' AND document_id = :document_id';
+            $params[':document_id'] = $documentId;
         }
 
-        return null;
+        if ($dimension !== null) {
+            $sql .= ' AND dimension = :dimension';
+            $params[':dimension'] = $dimension;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        $row = $stmt->fetch();
+
+        if ($row === false) {
+            return null;
+        }
+
+        return json_decode($row['vector'], true);
     }
 
     /** @param list<float> $vector */
-    public function set(string $textHash, array $vector): void
+    public function set(string $textHash, string $model, int $dimension, array $vector, ?int $documentId = null): void
     {
-        $key = $this->hashKey($textHash);
-        $this->cache[$key] = $vector;
+        $stmt = $this->db->prepare(
+            'INSERT OR REPLACE INTO embedding_cache (hash, vector, model, dimension, document_id, created_at) VALUES (:hash, :vector, :model, :dimension, :document_id, datetime(\'now\'))'
+        );
+        $stmt->bindValue(':hash', $textHash);
+        $stmt->bindValue(':vector', json_encode($vector));
+        $stmt->bindValue(':model', $model);
+        $stmt->bindValue(':dimension', $dimension, \PDO::PARAM_INT);
+        $stmt->bindValue(':document_id', $documentId, \PDO::PARAM_INT);
+        $stmt->execute();
     }
 
-    public function has(string $textHash): bool
+    public function has(string $textHash, string $model, ?int $documentId = null, ?int $dimension = null): bool
     {
-        $key = $this->hashKey($textHash);
-        return isset($this->cache[$key]);
-    }
+        $sql = 'SELECT 1 FROM embedding_cache WHERE hash = :hash AND model = :model';
+        $params = [':hash' => $textHash, ':model' => $model];
 
-    private function hashKey(string $textHash): string
-    {
-        return $textHash;
+        if ($documentId !== null) {
+            $sql .= ' AND document_id = :document_id';
+            $params[':document_id'] = $documentId;
+        }
+
+        if ($dimension !== null) {
+            $sql .= ' AND dimension = :dimension';
+            $params[':dimension'] = $dimension;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
+        return $stmt->fetch() !== false;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Embedding;
 
 use App\Core\Exceptions\EmbeddingException;
 use App\Core\Interfaces\EmbeddingProvider;
+use App\Utils\Constant;
 
 class OllamaEmbedding implements EmbeddingProvider
 {
@@ -15,17 +16,17 @@ class OllamaEmbedding implements EmbeddingProvider
     private int $maxChars;
 
     public function __construct(
-        string $baseUrl = 'http://localhost:11434',
-        string $model = 'nomic-embed-text',
-        int $dimension = 768,
-        int $retryCount = 3,
-        int $timeout = 30,
-        int $maxChars = 24000,
+        string $baseUrl = Constant::DEFAULT_OLLAMA_BASE_URL,
+        string $model = Constant::OLLAMA_EMBED_MODEL,
+        int $dimension = Constant::DEFAULT_EMBED_DIMENSION,
+        int $retryCount = Constant::DEFAULT_EMBED_RETRY,
+        int $timeout = Constant::DEFAULT_EMBED_TIMEOUT,
+        int $maxChars = Constant::DEFAULT_EMBED_MAX_CHARS,
     ) {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->model = $model;
-        $this->dimension = $dimension;
-        $this->retryCount = $retryCount;
+        $this->dimension = max(1, $dimension);
+        $this->retryCount = max(1, $retryCount);
         $this->timeout = $timeout;
         $this->maxChars = $maxChars;
     }
@@ -42,7 +43,7 @@ class OllamaEmbedding implements EmbeddingProvider
     /** @return list<float> */
     public function embed(string $text): array
     {
-        $url = $this->baseUrl . '/api/embeddings';
+        $url = $this->baseUrl . '/api/embed';
         $lastException = null;
 
         for ($attempt = 1; $attempt <= $this->retryCount; $attempt++) {
@@ -52,11 +53,12 @@ class OllamaEmbedding implements EmbeddingProvider
                 $http->SetOption(CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
                 $http->SetOption(CURLOPT_RETURNTRANSFER, true);
                 $http->SetOption(CURLOPT_TIMEOUT, $this->timeout);
-                $http->SetOption(CURLOPT_CONNECTTIMEOUT, 10);
+                $http->SetOption(CURLOPT_CONNECTTIMEOUT, Constant::HTTP_CONNECT_TIMEOUT);
 
                 $response = $http->Post([
                     'model' => $this->model,
-                    'prompt' => $this->truncate($text),
+                    'input' => $this->truncate($text),
+                    'dimensions' => $this->dimension,
                 ]);
 
                 if ($response === false) {
@@ -73,11 +75,14 @@ class OllamaEmbedding implements EmbeddingProvider
                     throw new EmbeddingException("Ollama error: " . $data['error']);
                 }
 
-                if (!isset($data['embedding'])) {
+                if (!isset($data['embeddings']) || !is_array($data['embeddings']) || count($data['embeddings']) === 0) {
                     throw new EmbeddingException("Response missing embedding data");
                 }
 
-                return $data['embedding'];
+                $vector = $data['embeddings'][0];
+                $this->validateVector($vector);
+
+                return $vector;
 
             } catch (EmbeddingException $e) {
                 $lastException = $e;
@@ -93,11 +98,41 @@ class OllamaEmbedding implements EmbeddingProvider
         );
     }
 
+    /** @param mixed $vector */
+    private function validateVector(mixed $vector): void
+    {
+        if (!is_array($vector)) {
+            throw new EmbeddingException('Embedding vector is not an array');
+        }
+        foreach ($vector as $i => $val) {
+            if (!is_numeric($val)) {
+                throw new EmbeddingException("Embedding value at index {$i} is not numeric");
+            }
+        }
+        if (count($vector) !== $this->dimension) {
+            throw new EmbeddingException(
+                "Embedding dimension mismatch: expected {$this->dimension}, got " . count($vector)
+            );
+        }
+    }
+
+    public function getDimension(): int
+    {
+        return $this->dimension;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
     /** @param list<string> $texts @return array<int, list<float>> */
     public function embedBatch(array $texts): array
     {
         $url = $this->baseUrl . '/api/embed';
         $lastException = null;
+        // Scale timeout reasonably: base timeout + small overhead per text, capped at 5 minutes
+        $effectiveTimeout = min($this->timeout + count($texts) * 2, 300);
 
         for ($attempt = 1; $attempt <= $this->retryCount; $attempt++) {
             try {
@@ -105,12 +140,13 @@ class OllamaEmbedding implements EmbeddingProvider
                 $http->SetEncoder('json_encode');
                 $http->SetOption(CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
                 $http->SetOption(CURLOPT_RETURNTRANSFER, true);
-                $http->SetOption(CURLOPT_TIMEOUT, $this->timeout * count($texts));
-                $http->SetOption(CURLOPT_CONNECTTIMEOUT, 10);
+                $http->SetOption(CURLOPT_TIMEOUT, $effectiveTimeout);
+                $http->SetOption(CURLOPT_CONNECTTIMEOUT, Constant::HTTP_CONNECT_TIMEOUT);
 
                 $response = $http->Post([
                     'model' => $this->model,
                     'input' => $texts,
+                    'dimensions' => $this->dimension,
                 ]);
 
                 if ($response === false) {
@@ -123,8 +159,15 @@ class OllamaEmbedding implements EmbeddingProvider
                     throw new EmbeddingException("Failed to decode batch response: " . json_last_error_msg());
                 }
 
-                if (!isset($data['embeddings'])) {
+                if (!isset($data['embeddings']) || !is_array($data['embeddings'])) {
                     throw new EmbeddingException("Batch response missing embeddings data");
+                }
+
+                foreach ($data['embeddings'] as $i => $vector) {
+                    if (!is_array($vector)) {
+                        throw new EmbeddingException("Batch embedding at index {$i} is not an array");
+                    }
+                    $this->validateVector($vector);
                 }
 
                 return $data['embeddings'];
@@ -141,15 +184,5 @@ class OllamaEmbedding implements EmbeddingProvider
         throw new EmbeddingException(
             "Batch embedding failed after {$this->retryCount} attempts: " . $lastException->getMessage()
         );
-    }
-
-    public function getDimension(): int
-    {
-        return $this->dimension;
-    }
-
-    public function getModel(): string
-    {
-        return $this->model;
     }
 }

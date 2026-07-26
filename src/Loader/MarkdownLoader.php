@@ -19,16 +19,21 @@ class MarkdownLoader
             throw new ValidationException("File not readable: $filePath");
         }
 
-        $content = file_get_contents($realPath);
-
-        if ($content === false) {
-            throw new ValidationException("Failed to read file: $filePath");
-        }
+        $content = $this->readLargeFile($realPath);
 
         $document = new Document();
         $document->setPath($realPath);
         $document->setHash(md5($content));
 
         return $document;
+    }
+
+    private function readLargeFile(string $path): string
+    {
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw new ValidationException("Failed to read file: $path");
+        }
+        return $content;
     }
 }

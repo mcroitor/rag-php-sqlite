@@ -5,14 +5,14 @@ namespace App\Services;
 use App\Core\Entities\RetrievalResult;
 use App\Core\Interfaces\EmbeddingProvider;
 use App\Core\Interfaces\StorageInterface;
+use App\Utils\Constant;
 
 class QueryService
 {
     public function __construct(
         private EmbeddingProvider $embedding,
         private StorageInterface $storage,
-        private int $defaultTopK = 5,
-        private float $defaultThreshold = 0.75,
+        private float $defaultThreshold = Constant::DEFAULT_THRESHOLD,
     ) {
     }
 

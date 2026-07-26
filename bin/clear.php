@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Storage\SQLiteStorage;
 use App\Utils\AppLogger;
 use App\Utils\Config;
+use App\Utils\Constant;
 
 $log = AppLogger::instance();
 
@@ -49,14 +50,16 @@ if (!\Mc\Arguments::GetValue('confirm')) {
     exit(1);
 }
 
-$dbPath = __DIR__ . '/../rag.sqlite';
+$dbPath = __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME;
 
 if (!file_exists($dbPath)) {
     $log->info('No database found. Nothing to clear.');
     exit(0);
 }
 
-$storage = new SQLiteStorage($dbPath);
+$db = new \PDO("sqlite:" . $dbPath);
+
+$storage = new SQLiteStorage($db);
 $storage->clearAll();
 
 $log->pass('All indexed data cleared successfully.');

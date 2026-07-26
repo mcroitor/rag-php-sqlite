@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Storage\SQLiteStorage;
 use App\Utils\AppLogger;
 use App\Utils\Config;
+use App\Utils\Constant;
 
 $log = AppLogger::instance();
 
@@ -15,14 +16,16 @@ try {
     exit(1);
 }
 
-$dbPath = __DIR__ . '/../rag.sqlite';
+$dbPath = __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME;
 
 if (!file_exists($dbPath)) {
     $log->error("Database not found. Run 'php bin/setup.php' first.");
     exit(1);
 }
 
-$storage = new SQLiteStorage($dbPath);
+$db = new \PDO("sqlite:$dbPath");
+
+$storage = new SQLiteStorage($db);
 
 $docCount = $storage->getDocumentCount();
 $chunkCount = $storage->getChunkCount();

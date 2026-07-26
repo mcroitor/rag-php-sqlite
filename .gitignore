@@ -1,0 +1,5 @@
+documents/
+docs/
+vendor/
+composer.phar
+*.sqlite

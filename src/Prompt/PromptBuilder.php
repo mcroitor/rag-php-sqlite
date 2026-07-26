@@ -3,13 +3,14 @@
 namespace App\Prompt;
 
 use App\Core\Entities\RetrievalResult;
+use App\Utils\Constant;
 
 class PromptBuilder
 {
     private ContextWindow $contextWindow;
     private int $maxContextTokens;
 
-    public function __construct(?ContextWindow $contextWindow = null, int $maxContextTokens = 4096)
+    public function __construct(?ContextWindow $contextWindow = null, int $maxContextTokens = Constant::DEFAULT_MAX_CONTEXT_TOKENS)
     {
         $this->contextWindow = $contextWindow ?? new ContextWindow($maxContextTokens);
         $this->maxContextTokens = $maxContextTokens;

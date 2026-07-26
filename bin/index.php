@@ -11,6 +11,7 @@ use App\Services\IndexingService;
 use App\Storage\SQLiteStorage;
 use App\Utils\AppLogger;
 use App\Utils\Config;
+use App\Utils\Constant;
 use App\Validator\ChunkValidator;
 
 $log = AppLogger::instance();
@@ -80,7 +81,10 @@ $embedding = new OllamaEmbedding(
     retryCount: $config->getRetryCount(),
 );
 
-$storage = new SQLiteStorage(__DIR__ . '/../rag.sqlite');
+$db = new \PDO("sqlite:" . __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME);
+
+$storage = new SQLiteStorage($db);
+$cache = new \App\Embedding\EmbeddingCache($db);
 
 $service = new IndexingService(
     scanner: new FileScanner(),
@@ -88,13 +92,15 @@ $service = new IndexingService(
     parser: new MarkdownParser(),
     chunker: new SemanticChunker(
         maxTokens: $config->getMaxTokens(),
+        overlap: $config->getOverlap(),
+        safetyMargin: $config->getSafetyMargin(),
     ),
     validator: new ChunkValidator(
         maxTokens: $config->getMaxTokens(),
-        safetyMargin: $config->getSafetyMargin(),
     ),
     embedding: $embedding,
     storage: $storage,
+    cache: $cache,
 );
 
 $log->info('Starting indexing...');

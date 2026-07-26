@@ -5,7 +5,7 @@
   "license": "GPL-3.0-or-later",
   "require": {
     "php": "^8.1",
-    "ext-sqlite3": "*",
+    "ext-pdo_sqlite": "*",
     "ext-json": "*",
     "mcroitor/logger": "dev-main",
     "mcroitor/mc-http": "dev-main",

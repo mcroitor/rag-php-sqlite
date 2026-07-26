@@ -1,0 +1,234 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "78339be9111e593d0776cc18544607a5",
+    "packages": [
+        {
+            "name": "mcroitor/arguments",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/arguments.git",
+                "reference": "5515379fde6c989f9eccbc6ef37d53026538f793"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/arguments/zipball/5515379fde6c989f9eccbc6ef37d53026538f793",
+                "reference": "5515379fde6c989f9eccbc6ef37d53026538f793",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\": "src/Mc/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor",
+                    "homepage": "https://github.com/mcroitor"
+                }
+            ],
+            "description": "PHP class for defining and parsing CLI arguments.",
+            "time": "2026-07-07T04:19:06+00:00"
+        },
+        {
+            "name": "mcroitor/logger",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/logger.git",
+                "reference": "f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/logger/zipball/f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b",
+                "reference": "f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "mc\\": "src/mc"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Mihail Croitor",
+                    "email": "mcroitor@gmail.com"
+                }
+            ],
+            "description": "Simple PHP logger.",
+            "time": "2025-04-18T20:54:45+00:00"
+        },
+        {
+            "name": "mcroitor/mc-http",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/mc-http.git",
+                "reference": "4d38b27db7234ef0fc101113c9ec6b9851ca1c9e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/mc-http/zipball/4d38b27db7234ef0fc101113c9ec6b9851ca1c9e",
+                "reference": "4d38b27db7234ef0fc101113c9ec6b9851ca1c9e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\": "mc/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor"
+                }
+            ],
+            "description": "PHP cURL wrapper",
+            "time": "2026-07-06T19:12:27+00:00"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "mcroitor/mc-unit",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/mc-unit.git",
+                "reference": "708abef2375ffd2bcb793823390ee2707ca88837"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/mc-unit/zipball/708abef2375ffd2bcb793823390ee2707ca88837",
+                "reference": "708abef2375ffd2bcb793823390ee2707ca88837",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\Unit\\": "src/mc/unit/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor",
+                    "homepage": "https://github.com/mcroitor"
+                }
+            ],
+            "description": "Simple PHP unit test framework",
+            "time": "2026-07-06T19:25:45+00:00"
+        },
+        {
+            "name": "phpstan/phpstan",
+            "version": "2.2.5",
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
+                "reference": "909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4|^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan-shim": "*"
+            },
+            "bin": [
+                "phpstan",
+                "phpstan.phar"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ondřej Mirtes"
+                },
+                {
+                    "name": "Markus Staab"
+                },
+                {
+                    "name": "Vincent Langlet"
+                }
+            ],
+            "description": "PHPStan - PHP Static Analysis Tool",
+            "keywords": [
+                "dev",
+                "static analysis"
+            ],
+            "support": {
+                "docs": "https://phpstan.org/user-guide/getting-started",
+                "forum": "https://github.com/phpstan/phpstan/discussions",
+                "issues": "https://github.com/phpstan/phpstan/issues",
+                "security": "https://github.com/phpstan/phpstan/security/policy",
+                "source": "https://github.com/phpstan/phpstan-src"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ondrejmirtes",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/phpstan",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-05T06:31:06+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "mcroitor/arguments": 20,
+        "mcroitor/logger": 20,
+        "mcroitor/mc-http": 20,
+        "mcroitor/mc-unit": 20
+    },
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.1",
+        "ext-sqlite3": "*",
+        "ext-json": "*"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

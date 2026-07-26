@@ -23,6 +23,12 @@ class AppLogger
         return self::$instance;
     }
 
+    /** Reset singleton (for testing / reconfiguration). */
+    public static function setInstance(?self $instance): void
+    {
+        self::$instance = $instance;
+    }
+
     public function enableDebug(bool $enable = true): void
     {
         $this->debugEnabled = $enable;

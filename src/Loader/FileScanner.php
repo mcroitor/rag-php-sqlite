@@ -7,8 +7,10 @@ use App\Core\Exceptions\ValidationException;
 class FileScanner
 {
     /** @param string[] $ignorePatterns */
-    public function __construct(private array $ignorePatterns = [])
-    {
+    public function __construct(
+        private array $ignorePatterns = [],
+        private ?string $baseDir = null,
+    ) {
     }
 
     /** @return string[] */
@@ -59,7 +61,7 @@ class FileScanner
 
     private function validatePath(string $path): void
     {
-        $baseDir = realpath(__DIR__ . '/../..');
+        $baseDir = $this->baseDir ?? realpath(__DIR__ . '/../..');
 
         if ($baseDir === false) {
             return;

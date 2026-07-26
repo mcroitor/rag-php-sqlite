@@ -10,6 +10,7 @@ use App\Services\RAGService;
 use App\Storage\SQLiteStorage;
 use App\Utils\AppLogger;
 use App\Utils\Config;
+use App\Utils\Constant;
 
 set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
@@ -34,7 +35,7 @@ try {
     'top-k' => [
         'short' => 'k',
         'long' => 'top-k',
-        'description' => 'Number of context results (default: 5)',
+        'description' => 'Number of context results (default: ' . Constant::DEFAULT_TOP_K . ')',
         'required' => false,
         'default' => null,
     ],
@@ -71,7 +72,7 @@ try {
     exit(1);
 }
 
-$topK = (int) (\Mc\Arguments::GetValue('top-k') ?: $config->getTopK());
+$topK = max(1, (int) (\Mc\Arguments::GetValue('top-k') ?: $config->getTopK()));
 $query = (string) \Mc\Arguments::GetValue('query');
 $debugLlm = (bool) \Mc\Arguments::GetValue('debug-llm');
 
@@ -82,19 +83,29 @@ $embedding = new OllamaEmbedding(
     retryCount: $config->getRetryCount(),
 );
 
-$storage = new SQLiteStorage(__DIR__ . '/../rag.sqlite');
+$db = new \PDO("sqlite:" . __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME);
+
+$storage = new SQLiteStorage($db);
 $llm = new OllamaLLM(
     baseUrl: $config->getOllamaBaseUrl(),
     model: $config->getLlmModel(),
     temperature: $config->getTemperature(),
+    numPredict: $config->getNumPredict(),
+    timeout: $config->getTimeout(),
+    fallbackContextWindow: $config->getContextWindow(),
 );
 
-$retriever = new VectorRetriever($embedding, $storage, $topK, $config->getThreshold());
-$maxContextTokens = max(256, $config->getMaxTokens() - $config->getSafetyMargin());
+$retriever = new VectorRetriever(
+    $embedding,
+    $storage,
+    $config->getThreshold(),
+);
+$maxContextTokens = $config->getContextWindow();
 $promptBuilder = new PromptBuilder(maxContextTokens: $maxContextTokens);
 $rag = new RAGService($retriever, $promptBuilder, $llm);
 
 $log->info("Asking: $query");
+$log->info("Config: model={$config->getLlmModel()}, threshold={$config->getThreshold()}, top_k={$topK}");
 
 try {
     $context = $rag->getContext($query, $topK);
@@ -106,7 +117,7 @@ try {
         exit(0);
     }
 
-    $answer = $rag->ask($query, $topK);
+    $answer = $rag->ask($query, $topK, $context);
 
     if ($debugLlm) {
         $meta = $llm->getLastResponseMeta();
