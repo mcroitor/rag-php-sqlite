@@ -2,10 +2,11 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Storage\SQLiteStorage;
-use App\Utils\AppLogger;
-use App\Utils\Config;
-use App\Utils\Constant;
+use App\Engine\Storage\SQLiteStorage;
+use App\Engine\Utils\AppLogger;
+use App\Engine\Utils\Config;
+use App\Engine\Utils\Constant;
+use App\Engine\Utils\DbFactory;
 
 $log = AppLogger::instance();
 
@@ -22,6 +23,13 @@ try {
         'long' => 'confirm',
         'description' => 'Confirm clearing all data',
         'required' => false,
+    ],
+    'rag' => [
+        'short' => 'r',
+        'long' => 'rag',
+        'description' => 'RAG database name (default: rag)',
+        'required' => false,
+        'default' => DbFactory::DEFAULT_BASE,
     ],
     'help' => [
         'short' => 'h',
@@ -50,16 +58,18 @@ if (!\Mc\Arguments::GetValue('confirm')) {
     exit(1);
 }
 
-$dbPath = __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME;
+$root = dirname(__DIR__);
+$base = (string) (\Mc\Arguments::GetValue('rag') ?: DbFactory::DEFAULT_BASE);
+$dbPath = DbFactory::path($root, $base);
 
-if (!file_exists($dbPath)) {
-    $log->info('No database found. Nothing to clear.');
+if (!DbFactory::exists($root, $base)) {
+    $log->info("No database '$base' found. Nothing to clear.");
     exit(0);
 }
 
-$db = new \PDO("sqlite:" . $dbPath);
+$db = DbFactory::pdo($root, $base);
 
 $storage = new SQLiteStorage($db);
 $storage->clearAll();
 
-$log->pass('All indexed data cleared successfully.');
+$log->pass("All indexed data cleared from '$base' successfully.");

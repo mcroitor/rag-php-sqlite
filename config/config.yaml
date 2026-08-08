@@ -21,4 +21,4 @@ llm:
 # Vector retrieval configuration
 retrieval:
   top_k: 10                  # Number of candidates to retrieve from vector search
-  threshold: 0.60            # Minimum cosine similarity score (0.0-1.0). qwen3-embedding:4b max ~0.5 for top matches. Lower = more recall, higher = more precision
+  threshold: 0.50            # Minimum cosine similarity score (0.0-1.0). qwen3-embedding:4b max ~0.58 for top matches. Lower = more recall, higher = more precision

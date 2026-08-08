@@ -1,0 +1,39 @@
+<nav class="navbar">
+    <div class="container">
+        <a class="brand" href="/">RAG</a>
+        <a href="/chat">Chat</a>
+        <a href="/search">Search</a>
+        <a href="/index">Index</a>
+        <a href="/documents">Documents</a>
+        <a href="/stats">Stats</a>
+        <div class="navbar-base">
+            <div class="three columns margin-6">
+                {{BASE_SELECTOR}}
+            </div>
+            <div class="two columns offset-by-three">
+                <button class="button-primary" id="create-base-btn">New Base</button>
+            </div>
+    </div>
+</nav>
+<!-- Modal for creating a new base -->
+<div class="modal-overlay" id="create-base-modal" style="display: none;">
+    <div class="modal">
+        <h3>Create New Database</h3>
+        <form id="create-base-form" autocomplete="off">
+            <div class="row">
+                <div class="twelve columns">
+                    <input type="text" id="new-base-name" name="base" placeholder="Enter database name (e.g., myproject)" required class="u-full-width" autocomplete="off">
+                </div>
+            </div>
+            <p class="search-status">Only lowercase letters, numbers, hyphens and underscores allowed.</p>
+            <div class="row">
+                <div class="six columns">
+                    <button type="button" class="button u-full-width" id="cancel-create-base">Cancel</button>
+                </div>
+                <div class="six columns">
+                    <button type="submit" class="button-primary u-full-width">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

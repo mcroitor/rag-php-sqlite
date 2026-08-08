@@ -1,0 +1,22 @@
+# Docker override: the app must reach Ollama via the compose service name.
+# Mounted over /app/config/config.yaml in the app container (see docker-compose.yaml).
+ollama:
+  base_url: http://ollama:11434
+
+embedding:
+  model: qwen3-embedding:4b
+  dimension: 1024
+  max_tokens: 200
+  safety_margin: 100
+  overlap: 50
+  retry: 3
+
+llm:
+  model: qwen3.5:4b
+  temperature: 0.7
+  num_predict: 10240
+  context_window: 20480
+
+retrieval:
+  top_k: 10
+  threshold: 0.60

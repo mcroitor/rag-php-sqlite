@@ -3,3 +3,4 @@ docs/
 vendor/
 composer.phar
 *.sqlite
+runtime/

@@ -2,17 +2,18 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Chunker\SemanticChunker;
-use App\Embedding\OllamaEmbedding;
-use App\Loader\FileScanner;
-use App\Loader\MarkdownLoader;
-use App\Parser\MarkdownParser;
-use App\Services\IndexingService;
-use App\Storage\SQLiteStorage;
-use App\Utils\AppLogger;
-use App\Utils\Config;
-use App\Utils\Constant;
-use App\Validator\ChunkValidator;
+use App\Engine\Chunker\SemanticChunker;
+use App\Engine\Embedding\OllamaEmbedding;
+use App\Engine\Loader\FileScanner;
+use App\Engine\Loader\MarkdownLoader;
+use App\Engine\Parser\MarkdownParser;
+use App\Engine\Services\IndexingService;
+use App\Engine\Storage\SQLiteStorage;
+use App\Engine\Utils\AppLogger;
+use App\Engine\Utils\Config;
+use App\Engine\Utils\Constant;
+use App\Engine\Utils\DbFactory;
+use App\Engine\Validator\ChunkValidator;
 
 $log = AppLogger::instance();
 
@@ -43,6 +44,13 @@ try {
         'description' => 'Incremental re-index (skip unchanged files)',
         'required' => false,
     ],
+    'rag' => [
+        'short' => 'r',
+        'long' => 'rag',
+        'description' => 'RAG database name (default: rag)',
+        'required' => false,
+        'default' => DbFactory::DEFAULT_BASE,
+    ],
     'help' => [
         'short' => 'h',
         'long' => 'help',
@@ -68,6 +76,7 @@ if (\Mc\Arguments::GetValue('help')) {
 $dir = \Mc\Arguments::GetValue('dir');
 $recursive = (bool) \Mc\Arguments::GetValue('recursive');
 $incremental = (bool) \Mc\Arguments::GetValue('incremental');
+$base = (string) (\Mc\Arguments::GetValue('rag') ?: DbFactory::DEFAULT_BASE);
 
 if (!is_dir($dir)) {
     $log->error("Directory not found: $dir");
@@ -81,10 +90,10 @@ $embedding = new OllamaEmbedding(
     retryCount: $config->getRetryCount(),
 );
 
-$db = new \PDO("sqlite:" . __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME);
+$db = DbFactory::pdo(dirname(__DIR__), $base);
 
 $storage = new SQLiteStorage($db);
-$cache = new \App\Embedding\EmbeddingCache($db);
+$cache = new \App\Engine\Embedding\EmbeddingCache($db);
 
 $service = new IndexingService(
     scanner: new FileScanner(),

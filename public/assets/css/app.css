@@ -1,0 +1,511 @@
+/* ===============
+ *     App CSS
+ * ===============
+ */
+
+.navbar {
+    background: #1e1e2f;
+    padding: 1rem 0;
+    margin-bottom: 3rem;
+}
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navbar .brand {
+    font-size: 1.8rem;
+    letter-spacing: -0.05rem;
+}
+
+.navbar .navbar-base {
+    margin-left: auto;
+}
+
+.base-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.base-selector select {
+    margin: 0;
+    padding: 0.4rem 0.8rem;
+    height: auto;
+    background: #2c2c44;
+    color: #fff;
+    border: 1px solid #45456b;
+    border-radius: 4px;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.search-box {
+    margin-bottom: 3rem;
+}
+
+.search-status,
+.search-empty {
+    color: #666;
+    font-style: italic;
+}
+
+.search-error {
+    color: #d33;
+}
+
+.search-result {
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    background: #fafafa;
+}
+
+.search-result-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.search-result-relevance {
+    background: #1e1e2f;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.2rem 0.8rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+}
+
+.search-result-source {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.search-result-heading {
+    color: #666;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.search-result-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #f0f0f0;
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: 1.3rem;
+    max-height: 24rem;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.search-result-meta {
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.chat-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.chat-message {
+    display: flex;
+}
+
+.chat-user {
+    justify-content: flex-end;
+}
+
+.chat-assistant {
+    justify-content: flex-start;
+}
+
+.chat-bubble {
+    max-width: 85%;
+    border-radius: 6px;
+    padding: 1.2rem 1.5rem;
+    font-size: 1.4rem;
+    line-height: 1.6;
+}
+
+.chat-user .chat-bubble {
+    background: #1e1e2f;
+    color: #fff;
+}
+
+.chat-assistant .chat-bubble {
+    background: #fafafa;
+    border: 1px solid #e1e1e1;
+}
+
+.chat-status {
+    color: #666;
+    font-style: italic;
+}
+
+.chat-error {
+    color: #d33;
+    border-color: #f2c4c4;
+}
+
+.chat-answer p {
+    margin: 0 0 1rem;
+}
+
+.chat-answer p:last-child {
+    margin-bottom: 0;
+}
+
+.chat-sources {
+    border-top: 1px solid #e1e1e1;
+    padding-top: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.chat-sources-title {
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+}
+
+.chat-source {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.chat-source-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.chat-source-name {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.chat-source-heading {
+    color: #666;
+    margin: 0;
+}
+
+/* ===============
+ *    Stats CSS
+ * ===============
+ */
+
+.stats-card {
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 2rem;
+    text-align: center;
+}
+
+.stats-card-value {
+    font-size: 3.2rem;
+    font-weight: 600;
+    letter-spacing: -0.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card-label {
+    color: #666;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    letter-spacing: 0.05rem;
+}
+
+.stats-panel {
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 2rem;
+}
+
+.stats-panel-title {
+    margin-top: 0;
+    font-size: 1.6rem;
+}
+
+.stats-panel code {
+    background: #f0f0f0;
+    border-radius: 3px;
+    padding: 0.1rem 0.4rem;
+}
+
+.stats-list {
+    margin: 0;
+    padding-left: 2rem;
+}
+
+.stats-error {
+    color: #d33;
+    margin-bottom: 0;
+}
+
+.status-badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 0.2rem 0.8rem;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.status-ok {
+    background: #2a9d3f;
+}
+
+.status-warn {
+    background: #d08a00;
+}
+
+.status-run {
+    background: #1f6fd0;
+}
+
+/* ===============
+ *    Index CSS
+ * ===============
+ */
+
+.index-box {
+    margin-bottom: 3rem;
+}
+
+.index-jobs-title {
+    margin-top: 3rem;
+}
+
+.jobs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.job-card {
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 1.5rem;
+}
+
+.job-card h4 {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.job-card-small {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+}
+
+.job-card-small .job-id {
+    font-family: monospace;
+    flex: 1;
+}
+
+.job-card-small .job-progress {
+    color: #666;
+    min-width: 4rem;
+    text-align: right;
+}
+
+.job-log {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #1e1e2f;
+    color: #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: 1.2rem;
+    max-height: 24rem;
+    overflow-y: auto;
+    margin-bottom: 0;
+}
+
+.progress {
+    height: 1rem;
+    background: #e1e1e1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0 0.3rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #1f6fd0;
+    transition: width 0.5s ease;
+}
+
+.progress-label {
+    color: #666;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.job-stats {
+    color: #444;
+    font-size: 1.3rem;
+}
+
+.doc-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.doc-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 9rem;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.doc-id {
+    font-family: monospace;
+    color: #1f6fd0;
+}
+
+.doc-chunks {
+    font-size: 1.1rem;
+}
+
+.doc-date {
+    font-size: 1.1rem;
+}
+
+.doc-path {
+    flex: 1;
+    font-family: monospace;
+    font-size: 1.2rem;
+    word-break: break-all;
+}
+
+.doc-remove {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.doc-remove:hover {
+    background: #a93226;
+}
+
+.doc-remove:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.doc-download {
+    display: inline-block;
+    color: #1f6fd0;
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 1.2rem;
+    word-break: break-all;
+}
+
+.doc-download:hover {
+    text-decoration: underline;
+}
+
+.doc-download:visited {
+    color: #6c3fb0;
+}
+
+/* ===============
+ *    Modal CSS
+ * ===============
+ */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 4px;
+    padding: 2rem;
+    max-width: 24rem;
+    width: 90%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.modal .search-status {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+/* ===============
+ *    utils
+ * ===============
+ */
+.margin-2 {
+    margin: 2px;
+}
+.margin-4 {
+    margin: 4px;
+}
+.margin-6 {
+    margin: 6px;
+}
+.margin-8 {
+    margin: 8px;
+}

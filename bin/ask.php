@@ -2,17 +2,22 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Embedding\OllamaEmbedding;
-use App\Embedding\OllamaLLM;
-use App\Prompt\PromptBuilder;
-use App\Retrieval\VectorRetriever;
-use App\Services\RAGService;
-use App\Storage\SQLiteStorage;
-use App\Utils\AppLogger;
-use App\Utils\Config;
-use App\Utils\Constant;
+use App\Engine\Embedding\OllamaEmbedding;
+use App\Engine\Embedding\OllamaLLM;
+use App\Engine\Prompt\PromptBuilder;
+use App\Engine\Retrieval\VectorRetriever;
+use App\Engine\Services\RAGService;
+use App\Engine\Storage\SQLiteStorage;
+use App\Engine\Utils\AppLogger;
+use App\Engine\Utils\Config;
+use App\Engine\Utils\Constant;
+use App\Engine\Utils\DbFactory;
 
 set_error_handler(function ($severity, $message, $file, $line) {
+    if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+        return true;
+    }
+
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
 
@@ -45,6 +50,13 @@ try {
         'description' => 'Print raw LLM generation metadata',
         'required' => false,
     ],
+    'rag' => [
+        'short' => 'r',
+        'long' => 'rag',
+        'description' => 'RAG database name (default: rag)',
+        'required' => false,
+        'default' => DbFactory::DEFAULT_BASE,
+    ],
     'help' => [
         'short' => 'h',
         'long' => 'help',
@@ -75,6 +87,7 @@ try {
 $topK = max(1, (int) (\Mc\Arguments::GetValue('top-k') ?: $config->getTopK()));
 $query = (string) \Mc\Arguments::GetValue('query');
 $debugLlm = (bool) \Mc\Arguments::GetValue('debug-llm');
+$base = (string) (\Mc\Arguments::GetValue('rag') ?: DbFactory::DEFAULT_BASE);
 
 $embedding = new OllamaEmbedding(
     baseUrl: $config->getOllamaBaseUrl(),
@@ -83,7 +96,7 @@ $embedding = new OllamaEmbedding(
     retryCount: $config->getRetryCount(),
 );
 
-$db = new \PDO("sqlite:" . __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME);
+$db = DbFactory::pdo(dirname(__DIR__), $base);
 
 $storage = new SQLiteStorage($db);
 $llm = new OllamaLLM(

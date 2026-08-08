@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78339be9111e593d0776cc18544607a5",
+    "content-hash": "4b2fc3cf5f612670d7dea8204eb2e4c4",
     "packages": [
         {
             "name": "mcroitor/arguments",
@@ -43,17 +43,53 @@
             "time": "2026-07-07T04:19:06+00:00"
         },
         {
+            "name": "mcroitor/database",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/database.git",
+                "reference": "8137984938b4a11dce813f568fee8616bfd161c4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/database/zipball/8137984938b4a11dce813f568fee8616bfd161c4",
+                "reference": "8137984938b4a11dce813f568fee8616bfd161c4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\": "src/Mc"
+                }
+            },
+            "license": [
+                "Unlicense license"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor",
+                    "homepage": "https://github.com/mcroitor"
+                }
+            ],
+            "description": "Simple PHP library, PDO wrapper.",
+            "time": "2026-07-31T16:44:01+00:00"
+        },
+        {
             "name": "mcroitor/logger",
             "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mcroitor/logger.git",
-                "reference": "f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b"
+                "reference": "4a745837aa6ceccb20b6e1153eaa5da6dc89f53c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcroitor/logger/zipball/f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b",
-                "reference": "f214e2d7d6c2d93f2b429c6ac9c7ce71f009351b",
+                "url": "https://api.github.com/repos/mcroitor/logger/zipball/4a745837aa6ceccb20b6e1153eaa5da6dc89f53c",
+                "reference": "4a745837aa6ceccb20b6e1153eaa5da6dc89f53c",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +99,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "mc\\": "src/mc"
+                    "Mc\\": "src/Mc"
                 }
             },
             "authors": [
@@ -73,7 +109,7 @@
                 }
             ],
             "description": "Simple PHP logger.",
-            "time": "2025-04-18T20:54:45+00:00"
+            "time": "2026-07-31T19:10:23+00:00"
         },
         {
             "name": "mcroitor/mc-http",
@@ -81,12 +117,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mcroitor/mc-http.git",
-                "reference": "4d38b27db7234ef0fc101113c9ec6b9851ca1c9e"
+                "reference": "2561f7095f1db657909b3299093bc6062eaf6ce8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcroitor/mc-http/zipball/4d38b27db7234ef0fc101113c9ec6b9851ca1c9e",
-                "reference": "4d38b27db7234ef0fc101113c9ec6b9851ca1c9e",
+                "url": "https://api.github.com/repos/mcroitor/mc-http/zipball/2561f7095f1db657909b3299093bc6062eaf6ce8",
+                "reference": "2561f7095f1db657909b3299093bc6062eaf6ce8",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +133,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Mc\\": "mc/"
+                    "Mc\\": "Mc/"
                 }
             },
             "license": [
@@ -109,22 +145,20 @@
                 }
             ],
             "description": "PHP cURL wrapper",
-            "time": "2026-07-06T19:12:27+00:00"
-        }
-    ],
-    "packages-dev": [
+            "time": "2026-08-05T11:13:02+00:00"
+        },
         {
-            "name": "mcroitor/mc-unit",
-            "version": "dev-main",
+            "name": "mcroitor/router",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mcroitor/mc-unit.git",
-                "reference": "708abef2375ffd2bcb793823390ee2707ca88837"
+                "url": "https://github.com/mcroitor/router.git",
+                "reference": "1382aa3169f4dd06a748cdee003e726ce605271a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcroitor/mc-unit/zipball/708abef2375ffd2bcb793823390ee2707ca88837",
-                "reference": "708abef2375ffd2bcb793823390ee2707ca88837",
+                "url": "https://api.github.com/repos/mcroitor/router/zipball/1382aa3169f4dd06a748cdee003e726ce605271a",
+                "reference": "1382aa3169f4dd06a748cdee003e726ce605271a",
                 "shasum": ""
             },
             "require": {
@@ -134,7 +168,82 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Mc\\Unit\\": "src/mc/unit/"
+                    "Mc\\": "src/Mc/"
+                }
+            },
+            "license": [
+                "Unlicense license"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor",
+                    "homepage": "https://github.com/mcroitor"
+                }
+            ],
+            "description": "The router class do simple thing: routes by label to the callable.",
+            "time": "2026-07-31T13:52:27+00:00"
+        },
+        {
+            "name": "mcroitor/template",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/template.git",
+                "reference": "bebb53c12b887b47346ae2a0dad85b47e699b583"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/template/zipball/bebb53c12b887b47346ae2a0dad85b47e699b583",
+                "reference": "bebb53c12b887b47346ae2a0dad85b47e699b583",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\": "src/Mc"
+                }
+            },
+            "license": [
+                " GPL-3.0 license"
+            ],
+            "authors": [
+                {
+                    "name": "mcroitor",
+                    "homepage": "https://github.com/mcroitor"
+                }
+            ],
+            "description": "Simple PHP template filler",
+            "time": "2026-07-31T13:59:36+00:00"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "mcroitor/mc-unit",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcroitor/mc-unit.git",
+                "reference": "764f6f68d844525af9e96009ea6fef7b64d12214"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcroitor/mc-unit/zipball/764f6f68d844525af9e96009ea6fef7b64d12214",
+                "reference": "764f6f68d844525af9e96009ea6fef7b64d12214",
+                "shasum": ""
+            },
+            "require": {
+                "mcroitor/logger": "dev-main",
+                "php": ">=8.3"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mc\\": "src/Mc/"
                 }
             },
             "license": [
@@ -147,15 +256,15 @@
                 }
             ],
             "description": "Simple PHP unit test framework",
-            "time": "2026-07-06T19:25:45+00:00"
+            "time": "2026-07-31T11:27:36+00:00"
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.5",
+            "version": "2.2.8",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
-                "reference": "909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e285254e60f33c21902efef4a926ca0987c06804",
+                "reference": "e285254e60f33c21902efef4a926ca0987c06804",
                 "shasum": ""
             },
             "require": {
@@ -211,22 +320,25 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-05T06:31:06+00:00"
+            "time": "2026-08-04T22:21:45+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
         "mcroitor/arguments": 20,
+        "mcroitor/database": 20,
         "mcroitor/logger": 20,
         "mcroitor/mc-http": 20,
-        "mcroitor/mc-unit": 20
+        "mcroitor/mc-unit": 20,
+        "mcroitor/router": 20,
+        "mcroitor/template": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.1",
-        "ext-sqlite3": "*",
+        "ext-pdo_sqlite": "*",
         "ext-json": "*"
     },
     "platform-dev": {},

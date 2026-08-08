@@ -1,0 +1,20 @@
+<div class="chat-box">
+    <form id="chat-form" autocomplete="off">
+        <div class="row">
+            <div class="twelve columns">
+                <label for="chat-query">Ask a question about the knowledge base:</label>
+                <textarea id="chat-query" name="q" rows="3" placeholder="Ask a question about the knowledge base..." required class="u-full-width"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="one column">
+                <input type="number" id="chat-topk" name="top_k" value="5" min="1" max="50" title="Number of context sources" class="u-full-width">
+
+            </div>
+            <div class="two columns offset-by-nine">
+                <button type="submit" class="button-primary u-full-width">Ask</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="chat-thread" class="chat-thread" aria-live="polite"></div>

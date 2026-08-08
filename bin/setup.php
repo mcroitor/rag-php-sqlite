@@ -2,9 +2,10 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Utils\AppLogger;
-use App\Utils\Config;
-use App\Utils\Constant;
+use App\Engine\Utils\AppLogger;
+use App\Engine\Utils\Config;
+use App\Engine\Utils\Constant;
+use App\Engine\Utils\DbFactory;
 
 $log = AppLogger::instance();
 $log->info('RAG-PHP-SQLite Setup');
@@ -23,13 +24,14 @@ try {
     exit(1);
 }
 
-$dbPath = __DIR__ . '/../' . Constant::DEFAULT_DB_FILENAME;
-$log->info("Initializing database: $dbPath");
+$root = dirname(__DIR__);
+$argv = $_SERVER['argv'] ?? [];
+$base = DbFactory::baseFromArgv($argv);
+$dbPath = DbFactory::path($root, $base);
+$log->info("Initializing database '$base': $dbPath");
 
 try {
-    $db = new \PDO("sqlite:$dbPath");
-    $db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
+    $db = DbFactory::pdo($root, $base);
     $db->exec('PRAGMA journal_mode = WAL');
     $db->exec('PRAGMA foreign_keys = ON');
 

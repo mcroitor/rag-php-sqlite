@@ -1,0 +1,16 @@
+<div class="search-box">
+    <form id="search-form" autocomplete="off">
+        <div class="row">
+            <div class="eight columns">
+                <input type="text" id="search-query" name="q" placeholder="Search the knowledge base..." required class="u-full-width">
+            </div>
+            <div class="two columns">
+                <input type="number" id="search-topk" name="top_k" value="5" min="1" max="50" title="Number of results" class="u-full-width">
+            </div>
+            <div class="two columns">
+                <button type="submit" class="button-primary u-full-width">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="search-results" aria-live="polite"></div>

@@ -23,7 +23,7 @@ $framework->PrintInfo();
 
 function testTokenCounter(): bool
 {
-    $counter = new \App\Chunker\TokenCounter();
+    $counter = new \App\Engine\Chunker\TokenCounter();
 
     Assert::Equal(0, $counter->count(''));
     Assert::Equal(0, $counter->count('   '));
@@ -36,7 +36,7 @@ function testTokenCounter(): bool
 
 function testSemanticChunker(): bool
 {
-    $chunker = new \App\Chunker\SemanticChunker(100, 0);
+    $chunker = new \App\Engine\Chunker\SemanticChunker(100, 0);
 
     $text = "# Title\n\nThis is a paragraph.\n\n## Section 1\n\nMore content here.";
     $chunks = $chunker->chunkText($text);
@@ -53,7 +53,7 @@ function testSemanticChunker(): bool
 
 function testCosineSimilarity(): bool
 {
-    $search = new \App\Storage\VectorSearch();
+    $search = new \App\Engine\Storage\VectorSearch();
 
     $a = [1.0, 0.0, 0.0];
     $b = [1.0, 0.0, 0.0];
@@ -72,22 +72,22 @@ function testCosineSimilarity(): bool
 
 function testChunkValidator(): bool
 {
-    $validator = new \App\Validator\ChunkValidator(100);
+    $validator = new \App\Engine\Validator\ChunkValidator(100);
 
-    $validChunk = new \App\Core\Entities\Chunk();
+    $validChunk = new \App\Engine\Core\Entities\Chunk();
     $validChunk->setText('Short text');
     $validChunk->setTokenCount(2);
 
     $result = $validator->validate($validChunk);
     Assert::True($result, 'Valid chunk passes', 'Valid chunk should pass');
 
-    $emptyChunk = new \App\Core\Entities\Chunk();
+    $emptyChunk = new \App\Engine\Core\Entities\Chunk();
     $emptyChunk->setText('');
 
     try {
         $validator->validate($emptyChunk);
         Assert::True(true, 'Empty chunk encoding passes', 'Empty chunk encoding check');
-    } catch (\App\Core\Exceptions\ValidationException $e) {
+    } catch (\App\Engine\Core\Exceptions\ValidationException $e) {
         Assert::True(true, 'Empty chunk may fail', 'Empty chunk validation');
     }
 
@@ -103,7 +103,7 @@ function testConfigLoader(): bool
     }
 
     try {
-        $config = new \App\Utils\Config($configPath);
+        $config = new \App\Engine\Utils\Config($configPath);
 
         Assert::IsString($config->getOllamaBaseUrl());
         Assert::IsString($config->getEmbeddingModel());
@@ -121,7 +121,7 @@ function testConfigLoader(): bool
 
 function testMarkdownParser(): bool
 {
-    $parser = new \App\Parser\MarkdownParser();
+    $parser = new \App\Engine\Parser\MarkdownParser();
     $content = "# Title\n\nContent under title.\n\n## Section 1\n\nSection content.";
     $sections = $parser->parseContent($content);
     Assert::Equal(2, count($sections));
@@ -138,7 +138,7 @@ function testMarkdownParser(): bool
 
 function testFileScannerValidation(): bool
 {
-    $scanner = new \App\Loader\FileScanner();
+    $scanner = new \App\Engine\Loader\FileScanner();
     $dir = __DIR__ . '/../documents';
     $targetDir = is_dir($dir) ? $dir : __DIR__ . '/..';
     $files = $scanner->scan($targetDir, false);
@@ -156,7 +156,7 @@ function testEmbeddingCache(): bool
     $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     $pdo->exec("CREATE TABLE embedding_cache (hash TEXT PRIMARY KEY, vector BLOB NOT NULL, model TEXT NOT NULL, dimension INTEGER NOT NULL, document_id INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')))");
     
-    $cache = new \App\Embedding\EmbeddingCache($pdo);
+    $cache = new \App\Engine\Embedding\EmbeddingCache($pdo);
     
     $textHash = md5('Hello world');
     $vector = [0.1, 0.2, 0.3];
@@ -168,7 +168,7 @@ function testEmbeddingCache(): bool
     
     $pdo = null; // Close connection
     $pdo2 = new \PDO("sqlite:$dbPath");
-    $cache2 = new \App\Embedding\EmbeddingCache($pdo2);
+    $cache2 = new \App\Engine\Embedding\EmbeddingCache($pdo2);
     Assert::True($cache2->has($textHash, $model), 'Cache persistence');
     Assert::Equal($vector, $cache2->get($textHash, $model), 'Persistent vector matches');
     
@@ -191,10 +191,10 @@ function testIndexingIncremental(): bool
     $pdo->exec("CREATE TABLE chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, document_id INTEGER NOT NULL, heading_path TEXT NOT NULL DEFAULT '', text TEXT NOT NULL, token_count INTEGER NOT NULL DEFAULT 0, hash TEXT NOT NULL, language TEXT NOT NULL DEFAULT '', embedding_model TEXT NOT NULL DEFAULT '', document_hash TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE)");
     $pdo->exec("CREATE TABLE embeddings (chunk_id INTEGER PRIMARY KEY, vector BLOB NOT NULL, embedding_model TEXT NOT NULL DEFAULT '', embedding_dimension INTEGER NOT NULL DEFAULT 0, embedding_version TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (chunk_id) REFERENCES chunks(id) ON DELETE CASCADE)");
     
-    $storage = new \App\Storage\SQLiteStorage($pdo);
+    $storage = new \App\Engine\Storage\SQLiteStorage($pdo);
     
     // Step 1: Index a file
-    $doc = new \App\Core\Entities\Document();
+    $doc = new \App\Engine\Core\Entities\Document();
     $doc->setPath('test.md');
     $doc->setHash(md5('initial content'));
     $storage->storeDocument($doc);
@@ -218,11 +218,11 @@ function testEmbeddingFailureHandling(): bool
 {    
     try {
         // Use a non-existent URL to trigger failure
-        $embedding = new \App\Embedding\OllamaEmbedding('http://invalid.url.local', 'test', 768, 1); // retry count set to 1 for speed
+        $embedding = new \App\Engine\Embedding\OllamaEmbedding('http://invalid.url.local', 'test', 768, 1); // retry count set to 1 for speed
 
         $embedding->embed('This should fail');
         Assert::True(false, 'Should have thrown exception on invalid URL');
-    } catch (\App\Core\Exceptions\EmbeddingException $e) {
+    } catch (\App\Engine\Core\Exceptions\EmbeddingException $e) {
         Assert::True(true, 'Caught expected embedding failure', 'Failure handled');
     }
 

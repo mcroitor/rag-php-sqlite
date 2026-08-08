@@ -1,0 +1,18 @@
+<div class="index-box">
+    <form id="index-form" autocomplete="off" enctype="multipart/form-data">
+        <div class="row">
+            <div class="eight columns">
+                <input type="file" id="index-files" name="files[]" accept=".md,text/markdown" multiple required class="u-full-width">
+            </div>
+            <div class="four columns">
+                <button type="submit" class="button-primary u-full-width">Upload & index</button>
+            </div>
+        </div>
+        <p class="search-status">Markdown files only. Each uploaded file is stored under runtime/documents/{base}/{uuid}/.</p>
+    </form>
+</div>
+<div id="index-status" aria-live="polite"></div>
+<h3 class="index-jobs-title">Recent jobs</h3>
+<div id="jobs-list" class="jobs-list" aria-live="polite">
+    <p class="search-status">No jobs yet.</p>
+</div>
